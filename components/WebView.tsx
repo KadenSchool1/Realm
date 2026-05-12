@@ -10,11 +10,12 @@ export default function WebView({ url }: WebViewProps) {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-300 mb-4">Realm Browser</h1>
-          <p className="text-gray-400 mb-8">Private web browsing with Mercury Workshop proxy</p>
+          <p className="text-gray-400 mb-8">Private web browsing with free search engines</p>
           <div className="space-y-2 text-left inline-block text-gray-400">
-            <p>✨ Privacy-focused search</p>
-            <p>🔒 Anonymous browsing</p>
+            <p>✨ Free search (no API keys)</p>
+            <p>🔒 Private browsing</p>
             <p>⚡ Fast performance</p>
+            <p>🌐 Multiple search engines</p>
           </div>
         </div>
       </div>

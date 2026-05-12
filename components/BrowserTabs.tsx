@@ -40,13 +40,13 @@ export default function BrowserTabs({
             }}
             className="ml-1 hover:bg-gray-600 rounded px-1 text-xs"
           >
-            ✕
+            ×
           </button>
         </div>
       ))}
       <button
         onClick={onNewTab}
-        className="ml-2 px-2 py-2 hover:bg-gray-700 rounded text-gray-400 text-lg"
+        className="ml-2 px-2 py-2 hover:bg-gray-700 rounded text-gray-400 text-lg transition"
       >
         +
       </button>

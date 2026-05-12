@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Realm - Private Web Browser',
-  description: 'A privacy-focused web browser with Mercury Workshop proxy integration',
+  description: 'A privacy-focused web browser with free search engines (no API keys)',
 };
 
 export default function RootLayout({

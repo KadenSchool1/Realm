@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBar from '@/components/SearchBar';
 import BrowserTabs from '@/components/BrowserTabs';
 import WebView from '@/components/WebView';
@@ -30,26 +30,26 @@ export default function Home() {
   const [addressValue, setAddressValue] = useState('');
   const [currentEngine, setCurrentEngine] = useState('Google');
   const [engines, setEngines] = useState<SearchEngine[]>([]);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const activeTab = tabs.find((tab) => tab.isActive);
 
-  // Load available search engines on mount
   useEffect(() => {
     const loadEngines = async () => {
       try {
         const response = await fetch('/api/search?action=list');
         const data = await response.json();
         setEngines(data.engines);
+        setIsLoading(false);
       } catch (error) {
         console.error('Failed to load search engines:', error);
-        // Fallback engines
         setEngines([
           { name: 'Google', url: 'https://www.google.com/search?q=' },
           { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
           { name: 'Bing', url: 'https://www.bing.com/search?q=' },
           { name: 'Brave Search', url: 'https://search.brave.com/search?q=' },
         ]);
+        setIsLoading(false);
       }
     };
 
@@ -66,7 +66,6 @@ export default function Home() {
       setAddressValue(data.url);
     } catch (error) {
       console.error('Search failed:', error);
-      // Fallback to Google
       const fallbackUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
       updateActiveTab(fallbackUrl);
       setAddressValue(fallbackUrl);
@@ -76,9 +75,7 @@ export default function Home() {
   const handleNavigate = (url: string) => {
     let finalUrl = url;
 
-    // Check if it's a URL or search query
     if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('about:')) {
-      // It's a search query
       handleSearch(url);
       return;
     }
@@ -141,9 +138,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900">
-      {/* Browser Header */}
       <div className="bg-gray-800 border-b border-gray-700">
-        {/* Engine Selector */}
         <div className="px-4 py-2 bg-gray-850 border-b border-gray-700">
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-400">Search Engine:</label>
@@ -151,6 +146,7 @@ export default function Home() {
               value={currentEngine}
               onChange={(e) => setCurrentEngine(e.target.value)}
               className="bg-gray-700 text-white px-3 py-1 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              disabled={isLoading}
             >
               {engines.map((engine) => (
                 <option key={engine.name} value={engine.name}>
@@ -161,7 +157,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Tabs */}
         <BrowserTabs
           tabs={tabs}
           onSwitchTab={switchTab}
@@ -169,7 +164,6 @@ export default function Home() {
           onNewTab={addNewTab}
         />
 
-        {/* Address Bar */}
         <SearchBar
           value={addressValue}
           onChange={setAddressValue}
@@ -178,7 +172,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Web Content Area */}
       <div className="flex-1 overflow-hidden bg-gray-900">
         {activeTab && <WebView url={activeTab.url} />}
       </div>

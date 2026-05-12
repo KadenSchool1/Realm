@@ -1,41 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Free proxies that don't require API keys or accounts
 const FREE_PROXIES = [
   {
     name: 'Google',
     url: 'https://www.google.com/search?q=',
-    type: 'direct'
   },
   {
     name: 'DuckDuckGo',
     url: 'https://duckduckgo.com/?q=',
-    type: 'direct'
   },
   {
     name: 'Bing',
     url: 'https://www.bing.com/search?q=',
-    type: 'direct'
   },
   {
     name: 'Brave Search',
     url: 'https://search.brave.com/search?q=',
-    type: 'direct'
   },
   {
     name: 'Startpage',
     url: 'https://www.startpage.com/sp/search?query=',
-    type: 'direct'
   },
   {
     name: 'Ecosia',
     url: 'https://www.ecosia.org/search?q=',
-    type: 'direct'
   },
   {
     name: 'MetaGer',
     url: 'https://metager.org/search?eingabe=',
-    type: 'direct'
   },
 ];
 
@@ -66,7 +58,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find the proxy engine
     const proxy = FREE_PROXIES.find(
       (p) => p.name.toLowerCase() === engine.toLowerCase()
     ) || FREE_PROXIES[0];
