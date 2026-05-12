@@ -1,37 +1,88 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const MERCURY_PROXY_BASE = 'https://api.mercurywork.shop';
+// Free proxies that don't require API keys or accounts
+const FREE_PROXIES = [
+  {
+    name: 'Google',
+    url: 'https://www.google.com/search?q=',
+    type: 'direct'
+  },
+  {
+    name: 'DuckDuckGo',
+    url: 'https://duckduckgo.com/?q=',
+    type: 'direct'
+  },
+  {
+    name: 'Bing',
+    url: 'https://www.bing.com/search?q=',
+    type: 'direct'
+  },
+  {
+    name: 'Brave Search',
+    url: 'https://search.brave.com/search?q=',
+    type: 'direct'
+  },
+  {
+    name: 'Startpage',
+    url: 'https://www.startpage.com/sp/search?query=',
+    type: 'direct'
+  },
+  {
+    name: 'Ecosia',
+    url: 'https://www.ecosia.org/search?q=',
+    type: 'direct'
+  },
+  {
+    name: 'MetaGer',
+    url: 'https://metager.org/search?eingabe=',
+    type: 'direct'
+  },
+];
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
-    const url = searchParams.get('url');
+    const engine = searchParams.get('engine') || 'google';
+    const action = searchParams.get('action');
 
-    if (!query && !url) {
+    if (action === 'list') {
       return NextResponse.json(
-        { error: 'Missing query or url parameter' },
+        { engines: FREE_PROXIES },
+        {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+          },
+        }
+      );
+    }
+
+    if (!query) {
+      return NextResponse.json(
+        { error: 'Missing query parameter' },
         { status: 400 }
       );
     }
 
-    let proxyUrl = MERCURY_PROXY_BASE;
-    if (query) {
-      proxyUrl += `/search?q=${encodeURIComponent(query)}`;
-    } else if (url) {
-      proxyUrl += `/fetch?url=${encodeURIComponent(url)}`;
-    }
+    // Find the proxy engine
+    const proxy = FREE_PROXIES.find(
+      (p) => p.name.toLowerCase() === engine.toLowerCase()
+    ) || FREE_PROXIES[0];
 
-    const response = await fetch(proxyUrl);
-    const data = await response.json();
+    const searchUrl = proxy.url + encodeURIComponent(query);
 
-    return NextResponse.json(data, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    });
+    return NextResponse.json(
+      { url: searchUrl, engine: proxy.name },
+      {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        },
+      }
+    );
   } catch (error) {
     console.error('Search proxy error:', error);
     return NextResponse.json(

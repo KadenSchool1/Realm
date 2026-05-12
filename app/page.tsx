@@ -12,6 +12,11 @@ interface Tab {
   isActive: boolean;
 }
 
+interface SearchEngine {
+  name: string;
+  url: string;
+}
+
 export default function Home() {
   const [tabs, setTabs] = useState<Tab[]>([
     {
@@ -23,15 +28,49 @@ export default function Home() {
   ]);
 
   const [addressValue, setAddressValue] = useState('');
+  const [currentEngine, setCurrentEngine] = useState('Google');
+  const [engines, setEngines] = useState<SearchEngine[]>([]);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const activeTab = tabs.find((tab) => tab.isActive);
 
+  // Load available search engines on mount
+  useEffect(() => {
+    const loadEngines = async () => {
+      try {
+        const response = await fetch('/api/search?action=list');
+        const data = await response.json();
+        setEngines(data.engines);
+      } catch (error) {
+        console.error('Failed to load search engines:', error);
+        // Fallback engines
+        setEngines([
+          { name: 'Google', url: 'https://www.google.com/search?q=' },
+          { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
+          { name: 'Bing', url: 'https://www.bing.com/search?q=' },
+          { name: 'Brave Search', url: 'https://search.brave.com/search?q=' },
+        ]);
+      }
+    };
+
+    loadEngines();
+  }, []);
+
   const handleSearch = async (query: string) => {
-    // Use Mercury Workshop proxy for searches
-    const proxyUrl = `https://api.mercurywork.shop/search?q=${encodeURIComponent(query)}`;
-    updateActiveTab(proxyUrl);
-    setAddressValue(proxyUrl);
+    try {
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(query)}&engine=${encodeURIComponent(currentEngine)}`
+      );
+      const data = await response.json();
+      updateActiveTab(data.url);
+      setAddressValue(data.url);
+    } catch (error) {
+      console.error('Search failed:', error);
+      // Fallback to Google
+      const fallbackUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+      updateActiveTab(fallbackUrl);
+      setAddressValue(fallbackUrl);
+    }
   };
 
   const handleNavigate = (url: string) => {
@@ -39,8 +78,9 @@ export default function Home() {
 
     // Check if it's a URL or search query
     if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('about:')) {
-      // Use Mercury Workshop proxy for searches
-      finalUrl = `https://api.mercurywork.shop/search?q=${encodeURIComponent(url)}`;
+      // It's a search query
+      handleSearch(url);
+      return;
     }
 
     updateActiveTab(finalUrl);
@@ -50,7 +90,13 @@ export default function Home() {
   const updateActiveTab = (url: string) => {
     setTabs((prevTabs) =>
       prevTabs.map((tab) =>
-        tab.isActive ? { ...tab, url, title: new URL(url).hostname || 'New Tab' } : tab
+        tab.isActive
+          ? {
+              ...tab,
+              url,
+              title: url === 'about:blank' ? 'New Tab' : new URL(url).hostname || 'New Tab',
+            }
+          : tab
       )
     );
   };
@@ -97,6 +143,24 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-gray-900">
       {/* Browser Header */}
       <div className="bg-gray-800 border-b border-gray-700">
+        {/* Engine Selector */}
+        <div className="px-4 py-2 bg-gray-850 border-b border-gray-700">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-400">Search Engine:</label>
+            <select
+              value={currentEngine}
+              onChange={(e) => setCurrentEngine(e.target.value)}
+              className="bg-gray-700 text-white px-3 py-1 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              {engines.map((engine) => (
+                <option key={engine.name} value={engine.name}>
+                  {engine.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {/* Tabs */}
         <BrowserTabs
           tabs={tabs}
@@ -116,9 +180,7 @@ export default function Home() {
 
       {/* Web Content Area */}
       <div className="flex-1 overflow-hidden bg-gray-900">
-        {activeTab && (
-          <WebView url={activeTab.url} />
-        )}
+        {activeTab && <WebView url={activeTab.url} />}
       </div>
     </div>
   );

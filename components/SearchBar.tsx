@@ -33,17 +33,17 @@ export default function SearchBar({
   return (
     <div className="bg-gray-800 px-4 py-3 border-t border-gray-700">
       <div className="flex items-center gap-2">
-        <button className="p-2 hover:bg-gray-700 rounded text-gray-400">🔄</button>
+        <button className="p-2 hover:bg-gray-700 rounded text-gray-400 transition">🔄</button>
         <input
           ref={inputRef}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Search with Mercury Workshop or enter URL..."
+          placeholder="Search or enter URL... (No API keys needed!)"
           className="flex-1 bg-gray-700 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-400"
         />
-        <button className="p-2 hover:bg-gray-700 rounded text-gray-400">⭐</button>
+        <button className="p-2 hover:bg-gray-700 rounded text-gray-400 transition">⭐</button>
       </div>
     </div>
   );
