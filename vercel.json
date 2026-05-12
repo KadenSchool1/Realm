@@ -1,0 +1,12 @@
+{
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "MERCURY_PROXY_URL": {
+      "description": "Mercury Workshop proxy URL",
+      "value": "https://api.mercurywork.shop/search"
+    }
+  }
+}
